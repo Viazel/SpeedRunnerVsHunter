@@ -1,0 +1,11 @@
+name: JeromeGame
+main: fr.viazel.jeromegame.JeromeGame
+version: 1.0
+description: Askip c'est le plugin de Jerome
+api-version: 1.19
+author: Viazel
+commands:
+  start:
+    description: START !!
+  end:
+    description: ENDNND
