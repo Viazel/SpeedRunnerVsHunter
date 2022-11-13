@@ -1,8 +1,8 @@
-package fr.viazel.jeromegame.commands;
+package fr.viazel.speedrunnervshunter.commands;
 
-import fr.viazel.jeromegame.Main;
-import fr.viazel.jeromegame.utils.GameManager;
-import fr.viazel.jeromegame.utils.PlayerRunner;
+import fr.viazel.speedrunnervshunter.Main;
+import fr.viazel.speedrunnervshunter.utils.GameManager;
+import fr.viazel.speedrunnervshunter.utils.PlayerRunner;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;

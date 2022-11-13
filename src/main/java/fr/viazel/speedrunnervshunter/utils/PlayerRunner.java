@@ -1,4 +1,4 @@
-package fr.viazel.jeromegame.utils;
+package fr.viazel.speedrunnervshunter.utils;
 
 import org.bukkit.entity.Player;
 

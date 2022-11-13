@@ -1,8 +1,8 @@
-package fr.viazel.jeromegame.listeners;
+package fr.viazel.speedrunnervshunter.listeners;
 
-import fr.viazel.jeromegame.Main;
-import fr.viazel.jeromegame.utils.GameManager;
-import fr.viazel.jeromegame.utils.PlayerRunner;
+import fr.viazel.speedrunnervshunter.Main;
+import fr.viazel.speedrunnervshunter.utils.GameManager;
+import fr.viazel.speedrunnervshunter.utils.PlayerRunner;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;

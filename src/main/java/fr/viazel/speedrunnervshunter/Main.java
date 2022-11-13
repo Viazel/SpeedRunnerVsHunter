@@ -1,10 +1,10 @@
-package fr.viazel.jeromegame;
+package fr.viazel.speedrunnervshunter;
 
-import fr.viazel.jeromegame.commands.EndCommand;
-import fr.viazel.jeromegame.commands.StartCommand;
-import fr.viazel.jeromegame.listeners.MainListener;
-import fr.viazel.jeromegame.utils.GameManager;
-import fr.viazel.jeromegame.utils.PlayerRunner;
+import fr.viazel.speedrunnervshunter.commands.EndCommand;
+import fr.viazel.speedrunnervshunter.commands.StartCommand;
+import fr.viazel.speedrunnervshunter.listeners.MainListener;
+import fr.viazel.speedrunnervshunter.utils.GameManager;
+import fr.viazel.speedrunnervshunter.utils.PlayerRunner;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;

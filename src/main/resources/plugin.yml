@@ -1,7 +1,7 @@
-name: JeromeGame
-main: fr.viazel.jeromegame.JeromeGame
+name: SpeedRunnerVsHunter
+main: fr.viazel.speedrunnervshunter.Main
 version: 1.0
-description: Askip c'est le plugin de Jerome
+description: Askip c'est le plugin d'un speedrunner
 api-version: 1.19
 author: Viazel
 commands:
