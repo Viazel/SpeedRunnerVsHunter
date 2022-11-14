@@ -3,7 +3,10 @@ package fr.viazel.speedrunnervshunter.commands;
 import fr.viazel.speedrunnervshunter.Main;
 import fr.viazel.speedrunnervshunter.utils.GameManager;
 import fr.viazel.speedrunnervshunter.utils.PlayerRunner;
+import fr.viazel.speedrunnervshunter.utils.SpeedRunnerLogger;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -18,16 +21,23 @@ public class StartCommand implements CommandExecutor {
         PlayerRunner p = new PlayerRunner((Player) sender);
 
         if(Main.getInstance().getGameManager() != GameManager.START) {
-            p.getPlayer().sendMessage("§cLa partie est déjà lancée !");
+            SpeedRunnerLogger.sendMessage(p.getPlayer(), "§cLa partie est déjà lancée !");
             return false;
         }
 
         if(!p.haveToBeOP()) return false;
 
         if(Bukkit.getOnlinePlayers().size() > 4) {
-            p.getPlayer().sendMessage("§cVous devez minimum être 4 joueurs !");
+            SpeedRunnerLogger.sendMessage(p.getPlayer(), "§cVous devez minimum être 4 joueurs !");
             return false;
         }
+
+        if(args.length < 1) {
+            SpeedRunnerLogger.sendMessage(p.getPlayer(), "§cVous devez rajouter le nombre de speedrunners !");
+            return false;
+        }
+
+        int speedRunnersNumber = Integer.parseInt(args[0]);
 
         ArrayList<Player> players = new ArrayList<>(Bukkit.getOnlinePlayers());
 
@@ -36,11 +46,13 @@ public class StartCommand implements CommandExecutor {
         int range = max - min + 1;
         int r = (int) ((Math.random() * range) + min);
 
-        Main.getInstance().speedrunners.add(new PlayerRunner(players.get(r)));
-
-        Main.getInstance().speedrunners.forEach(runner -> {
-            runner.getPlayer().sendMessage("Vous êtes SpeedRunner !");
-        });
+        for (int i = 0;i<speedRunnersNumber;i++) {
+            PlayerRunner wait = new PlayerRunner(players.get(r));
+            while (Main.containsInAnArrayList(Main.getInstance().speedrunners, wait.getPlayer())) {
+                wait = new PlayerRunner(players.get(r));
+            }
+            Main.getInstance().speedrunners.add(wait);
+        }
 
         Main.getInstance().changeGameManager(GameManager.GAME);
 

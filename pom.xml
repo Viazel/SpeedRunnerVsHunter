@@ -25,8 +25,6 @@
 
     <build>
         <defaultGoal>install</defaultGoal>
-<!--        <directory>../../Serveur/1.19/plugins</directory>-->
+        <directory>../../Serveur/1.19/plugins</directory>
     </build>
-
-
 </project>

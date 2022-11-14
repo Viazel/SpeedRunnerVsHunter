@@ -12,7 +12,7 @@ public class PlayerRunner {
 
     public boolean haveToBeOP() {
         if(!p.isOp()) {
-            p.sendMessage("§cVous devez être OP pour exécuter cette commande !");
+            SpeedRunnerLogger.sendMessage(p, "§cVous devez être OP pour exécuter cette commande !");
             return false;
         }
         return true;
