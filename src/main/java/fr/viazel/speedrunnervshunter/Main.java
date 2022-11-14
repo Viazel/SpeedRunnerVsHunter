@@ -41,7 +41,11 @@ public class Main extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        endGame();
+
+        if(gameManager.equals(GameManager.GAME)){
+            endGame();
+        }
+
     }
 
     public GameManager getGameManager() {
