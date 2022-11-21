@@ -13,6 +13,9 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -22,7 +25,7 @@ public class Main extends JavaPlugin {
 
     private static Main INSTANCE;
 
-    public ArrayList<PlayerRunner> speedrunners;
+    public ArrayList<Player> speedrunners;
 
     private GameManager gameManager;
 
@@ -37,6 +40,19 @@ public class Main extends JavaPlugin {
         getCommand("start").setExecutor(new StartCommand());
         getCommand("end").setExecutor(new EndCommand());
         getCommand("setspawn").setExecutor(new SetDefaultSpawnCommand());
+
+        ItemStack item = new ItemStack(Material.COMPASS);
+        ItemMeta itemMeta = item.getItemMeta();
+
+        itemMeta.setDisplayName("§l§e» §l§eMagical Compass");
+        item.setItemMeta(itemMeta);
+
+        ShapedRecipe expBottle = new ShapedRecipe(item);
+        expBottle.shape(" O ", "ODO", " O ");
+        expBottle.setIngredient('O', Material.DIAMOND);
+        expBottle.setIngredient('D', Material.OBSIDIAN);
+
+        getServer().addRecipe(expBottle);
     }
 
     @Override
@@ -57,7 +73,7 @@ public class Main extends JavaPlugin {
         switch (gameManager) {
             case GAME:
                 this.gameManager = GameManager.GAME;
-                SpeedRunnerLogger.broadcastMessage("La partie commence !");
+                SpeedRunnerLogger.sendTitle("La partie commence !");
                 launchGame();
                 break;
             case START:
@@ -66,12 +82,12 @@ public class Main extends JavaPlugin {
                 break;
             case ENDSPEEDRUNER:
                 this.gameManager = GameManager.ENDSPEEDRUNER;
-                SpeedRunnerLogger.broadcastMessage("La partie est finie ! §aLes speedrunners §font gagnés !");
+                SpeedRunnerLogger.sendTitle("La partie est finie ! §aLes speedrunners §font gagnés !");
                 endGame();
                 break;
             case ENDHUNTER:
                 this.gameManager = GameManager.ENDHUNTER;
-                SpeedRunnerLogger.broadcastMessage("La partie est finie ! §cLes Hunters §font gagnés !");
+                SpeedRunnerLogger.sendTitle("La partie est finie ! §cLes Hunters §font gagnés !");
                 endGame();
                 break;
         }
@@ -108,6 +124,7 @@ public class Main extends JavaPlugin {
     }
 
     private void endGame() {
+        Bukkit.getScheduler().cancelTasks(this);
         Bukkit.getOnlinePlayers().forEach(player -> {
             player.setPlayerListName(player.getName());
             player.setGameMode(GameMode.CREATIVE);
@@ -119,7 +136,7 @@ public class Main extends JavaPlugin {
         changeGameManager(GameManager.START);
     }
 
-    public static boolean containsInAnArrayList(ArrayList<PlayerRunner> list, Player thing) {
+    public static boolean containsInAnArrayList(ArrayList<Player> list, Player thing) {
 
         AtomicBoolean can = new AtomicBoolean(false);
 

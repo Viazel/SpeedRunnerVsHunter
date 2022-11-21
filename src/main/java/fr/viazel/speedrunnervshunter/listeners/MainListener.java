@@ -1,6 +1,7 @@
 package fr.viazel.speedrunnervshunter.listeners;
 
 import fr.viazel.speedrunnervshunter.Main;
+import fr.viazel.speedrunnervshunter.utils.ConfigFile;
 import fr.viazel.speedrunnervshunter.utils.GameManager;
 import fr.viazel.speedrunnervshunter.utils.PlayerRunner;
 import fr.viazel.speedrunnervshunter.utils.SpeedRunnerLogger;
@@ -14,27 +15,32 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.SmithItemEvent;
 import org.bukkit.event.player.*;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MainListener implements Listener {
 
-    private Map<Player, Integer> compassTracker;
+    private Inventory inv;
+
+    private Map<Player, Player> compassTracker;
     private static boolean hunterCanMoove;
 
     public MainListener() {
+        inv = Bukkit.createInventory(null, 27, "§eChoose your runner !");
         hunterCanMoove = true;
         compassTracker = new HashMap<>();
-        Bukkit.getOnlinePlayers().forEach(player -> {
-            compassTracker.put(player, 0);
-        });
     }
 
     public static void setHunterNotMoove() {
@@ -64,8 +70,10 @@ public class MainListener implements Listener {
         if(!(e.getEntity() instanceof Player)) return;
         if(!(e.getDamager() instanceof Player)) return;
 
-        Player p = (Player) e.getEntity();
-        Player target = (Player) e.getDamager();
+        if(!Main.getInstance().getGameManager().equals(GameManager.GAME)) return;
+
+        Player p = (Player) e.getDamager();
+        Player target = (Player) e.getEntity();
 
         if(Main.containsInAnArrayList(Main.getInstance().speedrunners, p) && Main.containsInAnArrayList(Main.getInstance().speedrunners, target)) {
             SpeedRunnerLogger.sendMessage(p, "§cVous ne pouvez pas frapper votre coéquipier !");
@@ -111,11 +119,13 @@ public class MainListener implements Listener {
 
         e.setDeathMessage("§eLe joueur §b" + p.getName() + " §eest mort !");
 
-        PlayerRunner wait = Main.getInstance().speedrunners.stream().filter(runner -> runner.getPlayer().getUniqueId() == p.getPlayer().getUniqueId()).findFirst().get();
+        if(!Main.containsInAnArrayList(Main.getInstance().speedrunners, p.getPlayer())) {
+            player.spigot().respawn();
+            player.teleport(new ConfigFile().getDefaultSpawnLocation());
+            return;
+        };
 
-        if(wait == null) return;
-
-        Main.getInstance().speedrunners.remove(wait);
+        Main.getInstance().speedrunners.remove(p.getPlayer());
 
         if(Main.getInstance().speedrunners.isEmpty()) {
             Main.getInstance().changeGameManager(GameManager.ENDHUNTER);
@@ -124,7 +134,7 @@ public class MainListener implements Listener {
 
         p.getPlayer().spigot().respawn();
         p.getPlayer().setGameMode(GameMode.SPECTATOR);
-        p.getPlayer().teleport(Main.getInstance().speedrunners.stream().findFirst().get().getPlayer());
+        p.getPlayer().teleport(Main.getInstance().speedrunners.stream().findFirst().get());
 
     }
 
@@ -136,15 +146,58 @@ public class MainListener implements Listener {
 
         if(!e.getAction().equals(Action.RIGHT_CLICK_AIR) && !e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
 
+        if(e.getPlayer().isSneaking()) return;
+
         if(e.getItem() == null) return;
 
         if(!e.getItem().getType().equals(Material.COMPASS)) return;
 
         Player p = e.getPlayer();
 
-        p.getPlayer().setCompassTarget(Bukkit.getPlayer("Layttos").getLocation());
+        int max = Main.getInstance().speedrunners.size() - 1;
+        int min = 0;
+        int range = max - min + 1;
+        int r = (int) ((Math.random() * range) + min);
 
-        SpeedRunnerLogger.sendMessage(p, "§aLa position de la boussole a été mise à jour !");
+        if(compassTracker.get(p) == null) {
+            SpeedRunnerLogger.sendMessage(p, "Vous devez chosir une cible en sneak + click gauche !");
+            return;
+        }
+
+        p.setCompassTarget(compassTracker.get(p).getLocation());
+
+        SpeedRunnerLogger.sendMessage(p, "La boussole a été mise à jour sur §b" + compassTracker.get(p).getName() + " §f!");
+
+    }
+
+    @EventHandler
+    public void eventSneak(PlayerInteractEvent e){
+        if(Main.getInstance().getGameManager() != GameManager.GAME) return;
+
+        if(Main.containsInAnArrayList(Main.getInstance().speedrunners, e.getPlayer())) return;
+
+        if(!e.getAction().equals(Action.RIGHT_CLICK_AIR) && !e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
+
+        if(!e.getPlayer().isSneaking()) return;
+
+        if(e.getItem() == null) return;
+
+        if(!e.getItem().getType().equals(Material.COMPASS)) return;
+
+        Player p = e.getPlayer();
+
+        ItemStack[] items = new ItemStack[27];
+
+        AtomicInteger i = new AtomicInteger();
+
+        Main.getInstance().speedrunners.forEach(playerRunner ->  {
+            items[i.get()] = getHead(playerRunner.getPlayer());
+            i.set(i.get() + 1);
+        });
+
+        inv.setContents(items);
+
+        p.openInventory(inv);
 
     }
 
@@ -155,15 +208,13 @@ public class MainListener implements Listener {
 
         if(Main.getInstance().getGameManager() != GameManager.GAME) return;
 
-        if(Main.containsInAnArrayList(Main.getInstance().speedrunners, (Player) e.getWhoClicked())) return;
+        if(!Main.containsInAnArrayList(Main.getInstance().speedrunners, (Player) e.getWhoClicked())) return;
 
         ItemStack item = e.getCurrentItem();
 
         PlayerRunner p = new PlayerRunner((Player) e.getWhoClicked());
 
-        PlayerRunner wait = Main.getInstance().speedrunners.stream().filter(runner -> runner.getPlayer().getUniqueId() == p.getPlayer().getUniqueId()).findFirst().get();
-
-        if(wait == null) return;
+        if(!Main.containsInAnArrayList(Main.getInstance().speedrunners, p.getPlayer())) return;
 
         assert item != null;
         if(item.getType().equals(Material.NETHERITE_SWORD)) {
@@ -174,27 +225,6 @@ public class MainListener implements Listener {
 
             Main.getInstance().changeGameManager(GameManager.ENDSPEEDRUNER);
 
-        }
-
-    }
-
-    @EventHandler
-    public void event(CraftItemEvent e){
-
-        if(!(e.getWhoClicked() instanceof Player)) return;
-
-        if(!Main.getInstance().getGameManager().equals(GameManager.GAME)) return;
-
-        if(e.getCurrentItem().getType().equals(Material.COMPASS)) {
-            ItemStack item = new ItemStack(Material.COMPASS);
-            ItemMeta itemMeta = item.getItemMeta();
-
-            Player p = (Player) e.getWhoClicked();
-
-            itemMeta.setDisplayName("§l§e» §l§e" + Main.getInstance().speedrunners.get(compassTracker.get(p)).getName());
-            item.setItemMeta(itemMeta);
-
-            e.setCurrentItem(item);
         }
 
     }
@@ -219,5 +249,41 @@ public class MainListener implements Listener {
             e.setJoinMessage("§eBienvenue à §b" + p.getName() + " §e! §a(§e" + Bukkit.getOnlinePlayers().size() + "§a/4)");
         }
 
+    }
+
+    @EventHandler
+    public void event(InventoryClickEvent e){
+
+        if(!(e.getWhoClicked() instanceof Player)) return;
+
+        if(e.getCurrentItem() == null) return;
+
+        Player p = (Player) e.getWhoClicked();
+
+        if(!e.getInventory().equals(inv)) return;
+
+        e.setCancelled(true);
+
+        Player target = Bukkit.getPlayer(e.getCurrentItem().getItemMeta().getDisplayName());
+
+        compassTracker.put(p, target);
+
+        p.closeInventory();
+
+        SpeedRunnerLogger.sendMessage(p, "Vous avez choisi §b" + target.getName() + " §f!");
+
+    }
+
+    public static ItemStack getHead(Player player) {
+        int lifePlayer = (int) player.getHealth();
+        ItemStack item = new ItemStack(Material.PLAYER_HEAD, 1, (short) 3);
+        SkullMeta skull = (SkullMeta) item.getItemMeta();
+        skull.setDisplayName(player.getName());
+        ArrayList<String> lore = new ArrayList<String>();
+        lore.add("Custom head");
+        skull.setLore(lore);
+        skull.setOwner(player.getName());
+        item.setItemMeta(skull);
+        return item;
     }
 }

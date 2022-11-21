@@ -13,4 +13,10 @@ public class SpeedRunnerLogger {
         Bukkit.broadcastMessage("§f[§eS§aV§cH§f] §f" + message);
     }
 
+    public static void sendTitle(String message) {
+        Bukkit.getOnlinePlayers().forEach(player -> {
+            player.sendTitle(message,"", 10, 20 * 2 + 10, 10);
+        });
+    }
+
 }

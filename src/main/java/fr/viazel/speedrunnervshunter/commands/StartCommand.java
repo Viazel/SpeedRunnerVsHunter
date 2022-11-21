@@ -27,17 +27,10 @@ public class StartCommand implements CommandExecutor {
 
         if(!p.haveToBeOP()) return false;
 
-        if(Bukkit.getOnlinePlayers().size() > 4) {
+        if(Bukkit.getOnlinePlayers().size() < 4) {
             SpeedRunnerLogger.sendMessage(p.getPlayer(), "§cVous devez minimum être 4 joueurs !");
             return false;
         }
-
-        if(args.length < 1) {
-            SpeedRunnerLogger.sendMessage(p.getPlayer(), "§cVous devez rajouter le nombre de speedrunners !");
-            return false;
-        }
-
-        int speedRunnersNumber = Integer.parseInt(args[0]);
 
         ArrayList<Player> players = new ArrayList<>(Bukkit.getOnlinePlayers());
 
@@ -46,13 +39,16 @@ public class StartCommand implements CommandExecutor {
         int range = max - min + 1;
         int r = (int) ((Math.random() * range) + min);
 
-        for (int i = 0;i<speedRunnersNumber;i++) {
-            PlayerRunner wait = new PlayerRunner(players.get(r));
-            while (Main.containsInAnArrayList(Main.getInstance().speedrunners, wait.getPlayer())) {
-                wait = new PlayerRunner(players.get(r));
-            }
-            Main.getInstance().speedrunners.add(wait);
+        Main.getInstance().speedrunners.add(players.get(r));
+
+        Player target = players.get(r);
+
+        while (Main.containsInAnArrayList(Main.getInstance().speedrunners, target)) {
+            r = (int) ((Math.random() * range) + min);
+            target = players.get(r);
         }
+
+        Main.getInstance().speedrunners.add(target);
 
         Main.getInstance().changeGameManager(GameManager.GAME);
 
