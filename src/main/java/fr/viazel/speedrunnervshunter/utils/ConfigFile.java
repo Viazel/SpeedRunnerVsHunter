@@ -3,6 +3,7 @@ package fr.viazel.speedrunnervshunter.utils;
 import fr.viazel.speedrunnervshunter.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
@@ -10,12 +11,11 @@ import java.io.IOException;
 
 public class ConfigFile {
 
-    private YamlConfiguration yamlConfiguration;
+    private FileConfiguration yamlConfiguration;
     private File file;
 
     public ConfigFile() {
-        file = new File(Main.getInstance().getDataFolder(), "config.yml");
-        yamlConfiguration = YamlConfiguration.loadConfiguration(file);
+        yamlConfiguration = Main.getInstance().getConfig();
     }
 
     public void setDefaultSpawn(Location location) {

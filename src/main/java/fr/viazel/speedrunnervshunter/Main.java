@@ -105,7 +105,7 @@ public class Main extends JavaPlugin {
         ConfigFile configFile = new ConfigFile();
 
         Bukkit.getOnlinePlayers().stream().forEach(player -> {
-            if(!containsInAnArrayList(speedrunners, player)) {
+            if(!speedrunners.contains(player)) {
                 player.setPlayerListName("§cHunter " + player.getName());
                 player.teleport(new Location(Bukkit.getWorld("world"), 2, 81, 2, 0.0f, 0.0f));
             }else {
@@ -130,21 +130,10 @@ public class Main extends JavaPlugin {
             player.setGameMode(GameMode.CREATIVE);
             player.setCompassTarget(new Location(Bukkit.getWorld("world"), 0, 0, 0));
             player.getInventory().clear();
-            player.teleport(new Location(Bukkit.getWorld("world"), 0 , 80, 0));
+            player.teleport(new Location(Bukkit.getWorld("world"), 0, 80, 0));
         });
         speedrunners.clear();
         changeGameManager(GameManager.START);
-    }
-
-    public static boolean containsInAnArrayList(ArrayList<Player> list, Player thing) {
-
-        AtomicBoolean can = new AtomicBoolean(false);
-
-        list.stream().forEach(anything -> {
-            if(anything.getPlayer().getUniqueId().equals(thing.getUniqueId())) can.set(true);
-        });
-
-        return can.get();
     }
 
     public static Main getInstance() { return INSTANCE; }

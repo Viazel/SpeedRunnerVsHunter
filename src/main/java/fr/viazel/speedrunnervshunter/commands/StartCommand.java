@@ -43,7 +43,7 @@ public class StartCommand implements CommandExecutor {
 
         Player target = players.get(r);
 
-        while (Main.containsInAnArrayList(Main.getInstance().speedrunners, target)) {
+        while (Main.getInstance().speedrunners.contains(target)) {
             r = (int) ((Math.random() * range) + min);
             target = players.get(r);
         }

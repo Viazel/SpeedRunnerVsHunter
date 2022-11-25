@@ -50,7 +50,7 @@ public class MainListener implements Listener {
             public void run() {
                 if(Main.getInstance().getGameManager().equals(GameManager.GAME)) {
                     hunterCanMoove = true;
-                    Bukkit.getOnlinePlayers().stream().filter(player -> !Main.containsInAnArrayList(Main.getInstance().speedrunners, player)).forEach(player -> {
+                    Bukkit.getOnlinePlayers().stream().filter(player -> !Main.getInstance().speedrunners.contains(player)).forEach(player -> {
                         player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 20 * 7, 1));
                     });
                     SpeedRunnerLogger.broadcastMessage("Les §cHunters §fsont lachés !");
@@ -75,13 +75,13 @@ public class MainListener implements Listener {
         Player p = (Player) e.getDamager();
         Player target = (Player) e.getEntity();
 
-        if(Main.containsInAnArrayList(Main.getInstance().speedrunners, p) && Main.containsInAnArrayList(Main.getInstance().speedrunners, target)) {
+        if(Main.getInstance().speedrunners.contains(p) && Main.getInstance().speedrunners.contains(target)) {
             SpeedRunnerLogger.sendMessage(p, "§cVous ne pouvez pas frapper votre coéquipier !");
             e.setCancelled(true);
             return;
         }
 
-        if(!Main.containsInAnArrayList(Main.getInstance().speedrunners, p) && !Main.containsInAnArrayList(Main.getInstance().speedrunners, target)) {
+        if(!Main.getInstance().speedrunners.contains(p) && !Main.getInstance().speedrunners.contains(target)) {
             SpeedRunnerLogger.sendMessage(p, "§cVous ne pouvez pas frapper votre coéquipier !");
             e.setCancelled(true);
         }
@@ -90,7 +90,7 @@ public class MainListener implements Listener {
 
     @EventHandler
     public void event(PlayerMoveEvent e){
-        if(!Main.containsInAnArrayList(Main.getInstance().speedrunners, e.getPlayer())) {
+        if(!Main.getInstance().speedrunners.contains(e.getPlayer())) {
             if(Main.getInstance().getGameManager().equals(GameManager.GAME)) {
                 if(!hunterCanMoove) {
                     e.setCancelled(true);
@@ -119,7 +119,7 @@ public class MainListener implements Listener {
 
         e.setDeathMessage("§eLe joueur §b" + p.getName() + " §eest mort !");
 
-        if(!Main.containsInAnArrayList(Main.getInstance().speedrunners, p.getPlayer())) {
+        if(!Main.getInstance().speedrunners.contains(player)) {
             player.spigot().respawn();
             player.teleport(new ConfigFile().getDefaultSpawnLocation());
             return;
@@ -142,7 +142,7 @@ public class MainListener implements Listener {
     public void event(PlayerInteractEvent e){
         if(Main.getInstance().getGameManager() != GameManager.GAME) return;
 
-        if(Main.containsInAnArrayList(Main.getInstance().speedrunners, e.getPlayer())) return;
+        if(Main.getInstance().speedrunners.contains(e.getPlayer())) return;
 
         if(!e.getAction().equals(Action.RIGHT_CLICK_AIR) && !e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
 
@@ -174,7 +174,7 @@ public class MainListener implements Listener {
     public void eventSneak(PlayerInteractEvent e){
         if(Main.getInstance().getGameManager() != GameManager.GAME) return;
 
-        if(Main.containsInAnArrayList(Main.getInstance().speedrunners, e.getPlayer())) return;
+        if(Main.getInstance().speedrunners.contains(e.getPlayer())) return;
 
         if(!e.getAction().equals(Action.RIGHT_CLICK_AIR) && !e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
 
@@ -208,13 +208,13 @@ public class MainListener implements Listener {
 
         if(Main.getInstance().getGameManager() != GameManager.GAME) return;
 
-        if(!Main.containsInAnArrayList(Main.getInstance().speedrunners, (Player) e.getWhoClicked())) return;
+        if(!Main.getInstance().speedrunners.contains((Player) e.getWhoClicked())) return;
 
         ItemStack item = e.getCurrentItem();
 
         PlayerRunner p = new PlayerRunner((Player) e.getWhoClicked());
 
-        if(!Main.containsInAnArrayList(Main.getInstance().speedrunners, p.getPlayer())) return;
+        if(!Main.getInstance().speedrunners.contains(p.getPlayer())) return;
 
         assert item != null;
         if(item.getType().equals(Material.NETHERITE_SWORD)) {
