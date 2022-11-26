@@ -12,9 +12,9 @@ import java.io.IOException;
 public class ConfigFile {
 
     private FileConfiguration yamlConfiguration;
-    private File file;
 
     public ConfigFile() {
+
         yamlConfiguration = Main.getInstance().getConfig();
     }
 
@@ -25,7 +25,7 @@ public class ConfigFile {
         yamlConfiguration.set("spawn.z", location.getBlockZ());
         yamlConfiguration.set("spawn.yaw", location.getYaw());
         yamlConfiguration.set("spawn.pitch", location.getPitch());
-        save();
+        Main.getInstance().saveConfig();
     }
 
     public Location getDefaultSpawnLocation() {
@@ -42,14 +42,6 @@ public class ConfigFile {
                      (float) yamlConfiguration.getDouble("spawn.pitch"));
 
         return l;
-    }
-
-    private void save() {
-        try {
-            yamlConfiguration.save(file);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
 }

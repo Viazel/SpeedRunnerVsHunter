@@ -1,6 +1,5 @@
 package fr.viazel.speedrunnervshunter.commands;
 
-import fr.viazel.speedrunnervshunter.Main;
 import fr.viazel.speedrunnervshunter.utils.ConfigFile;
 import fr.viazel.speedrunnervshunter.utils.GameManager;
 import fr.viazel.speedrunnervshunter.utils.PlayerRunner;
@@ -16,11 +15,12 @@ public class SetDefaultSpawnCommand implements CommandExecutor {
 
         PlayerRunner p = new PlayerRunner((Player) sender);
 
-        if(!p.haveToBeOP()) return false;
+        if(!p.hasToBeOP()) return false;
 
         ConfigFile configFile = new ConfigFile();
         configFile.setDefaultSpawn(p.getPlayer().getLocation());
         SpeedRunnerLogger.sendMessage(p.getPlayer(), "§aLe spawn des SpeedRunners a bien été défini !");
+        SpeedRunnerLogger.sendMessage(p.getPlayer(), GameManager.getGameManager().toString());
 
         return false;
     }

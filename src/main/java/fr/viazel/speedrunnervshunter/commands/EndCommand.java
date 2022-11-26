@@ -2,6 +2,7 @@ package fr.viazel.speedrunnervshunter.commands;
 
 import fr.viazel.speedrunnervshunter.Main;
 import fr.viazel.speedrunnervshunter.utils.GameManager;
+import fr.viazel.speedrunnervshunter.utils.GameManagerEnum;
 import fr.viazel.speedrunnervshunter.utils.PlayerRunner;
 import fr.viazel.speedrunnervshunter.utils.SpeedRunnerLogger;
 import org.bukkit.command.Command;
@@ -13,18 +14,22 @@ public class EndCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 
-        PlayerRunner p = new PlayerRunner((Player) sender);
+        if(!(sender instanceof Player)) return false;
 
-        if(Main.getInstance().getGameManager() == GameManager.START) {
+        Player p = (Player) sender;
+
+        GameManagerEnum gameManager = GameManager.getGameManager();
+
+        if(gameManager == GameManagerEnum.START) {
             SpeedRunnerLogger.sendMessage(p.getPlayer(), "§cLa partie n'est pas déjà lancée !");
             return false;
         }
 
-        if(!p.haveToBeOP()) return false;
+        if(!(new PlayerRunner(p)).hasToBeOP()) return false;
 
         SpeedRunnerLogger.sendMessage(p.getPlayer(), "§aLa partie a été forcé de se finir !");
 
-        Main.getInstance().changeGameManager(GameManager.ENDHUNTER);
+        GameManager.changeGameManager(GameManagerEnum.ENDHUNTER);
 
         return false;
     }

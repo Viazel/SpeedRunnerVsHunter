@@ -3,14 +3,8 @@ package fr.viazel.speedrunnervshunter;
 import fr.viazel.speedrunnervshunter.commands.EndCommand;
 import fr.viazel.speedrunnervshunter.commands.SetDefaultSpawnCommand;
 import fr.viazel.speedrunnervshunter.commands.StartCommand;
-import fr.viazel.speedrunnervshunter.listeners.MainListener;
-import fr.viazel.speedrunnervshunter.utils.ConfigFile;
-import fr.viazel.speedrunnervshunter.utils.GameManager;
-import fr.viazel.speedrunnervshunter.utils.PlayerRunner;
-import fr.viazel.speedrunnervshunter.utils.SpeedRunnerLogger;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
+import fr.viazel.speedrunnervshunter.listeners.*;
+import fr.viazel.speedrunnervshunter.utils.*;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -18,122 +12,41 @@ import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import java.util.ArrayList;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Main extends JavaPlugin {
 
     private static Main INSTANCE;
 
-    public ArrayList<Player> speedrunners;
-
     private GameManager gameManager;
 
     @Override
     public void onEnable() {
-        saveDefaultConfig();
-        speedrunners = new ArrayList<>();
+
         INSTANCE = this;
-        this.gameManager = GameManager.START;
+
+        this.gameManager = new GameManager();
+
+        saveDefaultConfig();
         getServer().getLogger().info("Plugin activated !");
         getServer().getPluginManager().registerEvents(new MainListener(), this);
+        getServer().getPluginManager().registerEvents(new MoveListener(), this);
+        getServer().getPluginManager().registerEvents(new DamageListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerQuitJoinListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerDeathListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerInteractListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerInventoryListener(), this);
         getCommand("start").setExecutor(new StartCommand());
         getCommand("end").setExecutor(new EndCommand());
         getCommand("setspawn").setExecutor(new SetDefaultSpawnCommand());
-
-        ItemStack item = new ItemStack(Material.COMPASS);
-        ItemMeta itemMeta = item.getItemMeta();
-
-        itemMeta.setDisplayName("§l§e» §l§eMagical Compass");
-        item.setItemMeta(itemMeta);
-
-        ShapedRecipe expBottle = new ShapedRecipe(item);
-        expBottle.shape(" O ", "ODO", " O ");
-        expBottle.setIngredient('O', Material.DIAMOND);
-        expBottle.setIngredient('D', Material.OBSIDIAN);
-
-        getServer().addRecipe(expBottle);
     }
 
     @Override
     public void onDisable() {
 
-        if(gameManager.equals(GameManager.GAME)){
-            endGame();
+        if(gameManager.equals(GameManagerEnum.GAME)){
+            GameManager.endGame();
         }
 
-    }
-
-    public GameManager getGameManager() {
-        return gameManager;
-    }
-
-    public void changeGameManager(GameManager gameManager) {
-
-        switch (gameManager) {
-            case GAME:
-                this.gameManager = GameManager.GAME;
-                SpeedRunnerLogger.sendTitle("La partie commence !");
-                launchGame();
-                break;
-            case START:
-                this.gameManager = GameManager.START;
-                SpeedRunnerLogger.broadcastMessage("En attente de joueur...");
-                break;
-            case ENDSPEEDRUNER:
-                this.gameManager = GameManager.ENDSPEEDRUNER;
-                SpeedRunnerLogger.sendTitle("La partie est finie ! §aLes speedrunners §font gagnés !");
-                endGame();
-                break;
-            case ENDHUNTER:
-                this.gameManager = GameManager.ENDHUNTER;
-                SpeedRunnerLogger.sendTitle("La partie est finie ! §cLes Hunters §font gagnés !");
-                endGame();
-                break;
-        }
-
-    }
-
-    private void launchGame() {
-
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                Bukkit.getWorld("world").getBlockAt(i, 80, j).setType(Material.GLASS);
-            }
-        }
-
-        ConfigFile configFile = new ConfigFile();
-
-        Bukkit.getOnlinePlayers().stream().forEach(player -> {
-            if(!speedrunners.contains(player)) {
-                player.setPlayerListName("§cHunter " + player.getName());
-                player.teleport(new Location(Bukkit.getWorld("world"), 2, 81, 2, 0.0f, 0.0f));
-            }else {
-                player.teleport(configFile.getDefaultSpawnLocation());
-                player.setPlayerListName("§aSpeedRunner " + player.getName());
-                SpeedRunnerLogger.sendMessage(player, "§aVous êtes SpeedRunner !");
-            }
-        });
-
-        Bukkit.getOnlinePlayers().forEach(player -> {
-            player.setGameMode(GameMode.SURVIVAL);
-            player.getInventory().clear();
-        });
-
-        MainListener.setHunterNotMoove();
-    }
-
-    private void endGame() {
-        Bukkit.getScheduler().cancelTasks(this);
-        Bukkit.getOnlinePlayers().forEach(player -> {
-            player.setPlayerListName(player.getName());
-            player.setGameMode(GameMode.CREATIVE);
-            player.setCompassTarget(new Location(Bukkit.getWorld("world"), 0, 0, 0));
-            player.getInventory().clear();
-            player.teleport(new Location(Bukkit.getWorld("world"), 0, 80, 0));
-        });
-        speedrunners.clear();
-        changeGameManager(GameManager.START);
     }
 
     public static Main getInstance() { return INSTANCE; }
