@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
@@ -20,7 +21,17 @@ public class GameManager {
 
     private static ArrayList<Player> speedrunners;
 
+    private static ItemStack[] kitRunner;
+
     public GameManager() {
+
+        kitRunner = new ItemStack[40];
+        kitRunner[0] = new ItemStack(Material.DIAMOND_SWORD);
+        kitRunner[39] = new ItemStack(Material.IRON_HELMET);
+        kitRunner[38] = new ItemStack(Material.IRON_CHESTPLATE);
+        kitRunner[37] = new ItemStack(Material.IRON_LEGGINGS);
+        kitRunner[36] = new ItemStack(Material.IRON_BOOTS);
+
         speedrunners = new ArrayList<>();
         gameManager = GameManagerEnum.START;
         speedrunners = new ArrayList<>();
@@ -45,29 +56,29 @@ public class GameManager {
 
     private static void launchGame() {
 
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                Bukkit.getWorld("world").getBlockAt(i, 80, j).setType(Material.GLASS);
-            }
-        }
-
         ConfigFile configFile = new ConfigFile();
-        Location l = new Location(Bukkit.getWorld("world"), 2, 81, 2, 0.0f, 0.0f);
+
+        Location la = configFile.getDefaultSpawnLocation();
+
+
+        Bukkit.getOnlinePlayers().forEach(player -> {
+            player.setGameMode(GameMode.SURVIVAL);
+            player.setHealth(20);
+            player.setFoodLevel(20);
+            player.getInventory().clear();
+        });
 
         Bukkit.getOnlinePlayers().stream().forEach(player -> {
             if(!speedrunners.contains(player)) {
                 player.setPlayerListName("§cHunter " + player.getName());
-                player.teleport(l);
+                player.teleport(configFile.getDefaultSpawnLocation());
             }else {
                 player.teleport(configFile.getDefaultSpawnLocation());
+                player.getInventory().setContents(kitRunner);
+                player.updateInventory();
                 player.setPlayerListName("§aSpeedRunner " + player.getName());
                 SpeedRunnerLogger.sendMessage(player, "§aVous êtes SpeedRunner !");
             }
-        });
-
-        Bukkit.getOnlinePlayers().forEach(player -> {
-            player.setGameMode(GameMode.SURVIVAL);
-            player.getInventory().clear();
         });
 
         MoveListener.setHunterNotMove();
@@ -86,16 +97,20 @@ public class GameManager {
         changeGameManager(GameManagerEnum.START);
     }
 
+    private static void setGameManager(GameManagerEnum gameManagerEnum) {
+        gameManager = gameManagerEnum;
+    }
+
     public static void changeGameManager(GameManagerEnum gameManager) {
+
+        setGameManager(gameManager);
 
         switch (gameManager) {
             case GAME:
-                GameManager.gameManager = GameManagerEnum.GAME;
                 SpeedRunnerLogger.sendTitle("La partie commence !");
                 launchGame();
                 break;
             case START:
-                GameManager.gameManager = GameManagerEnum.START;
                 SpeedRunnerLogger.broadcastMessage("En attente de joueur...");
                 break;
             case ENDSPEEDRUNER:
@@ -103,7 +118,6 @@ public class GameManager {
                 endGame();
                 break;
             case ENDHUNTER:
-                GameManager.gameManager = GameManagerEnum.ENDHUNTER;
                 SpeedRunnerLogger.sendTitle("La partie est finie ! §cLes Hunters §font gagnés !");
                 endGame();
                 break;

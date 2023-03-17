@@ -24,7 +24,7 @@ public class StartCommand implements CommandExecutor {
         GameManagerEnum gameManager = GameManager.getGameManager();
 
         if(gameManager != GameManagerEnum.START) {
-            SpeedRunnerLogger.sendMessage(p.getPlayer(), "§cLa partie est déjà lancée !");
+            SpeedRunnerLogger.sendMessage(p, "§cLa partie est déjà lancée !");
             return false;
         }
 
@@ -42,7 +42,9 @@ public class StartCommand implements CommandExecutor {
 
         ArrayList<Player> speedrunners = GameManager.getSpeedrunners();
 
-        Player newPlayer = ((ArrayList<Player>) Bukkit.getOnlinePlayers()).get(r);
+        ArrayList<Player> players = new ArrayList<>(Bukkit.getOnlinePlayers());
+
+        Player newPlayer = players.get(r);
 
         speedrunners.add(newPlayer);
 
@@ -50,7 +52,7 @@ public class StartCommand implements CommandExecutor {
 
         while (speedrunners.contains(target)) {
             r = (int) ((Math.random() * range) + min);
-            target = ((ArrayList<Player>) Bukkit.getOnlinePlayers()).get(r);
+            target = players.get(r);
         }
 
         speedrunners.add(target);

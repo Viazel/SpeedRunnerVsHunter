@@ -13,17 +13,11 @@ import org.bukkit.potion.PotionEffectType;
 
 public class MoveListener implements Listener {
 
-    private static GameManagerEnum gameManager;
-
-    public MoveListener() {
-        gameManager = GameManager.getGameManager();
-    }
-
     @EventHandler
     public void event(PlayerMoveEvent e){
 
         if(!GameManager.getSpeedrunners().contains(e.getPlayer())) {
-            if(gameManager.equals(GameManagerEnum.GAME)) {
+            if(GameManager.getGameManager().equals(GameManagerEnum.GAME)) {
                 if(!MainListener.isHunterCanMoove()) {
                     e.setCancelled(true);
                 }
@@ -33,13 +27,11 @@ public class MoveListener implements Listener {
 
     public static void setHunterNotMove() {
 
-        gameManager = GameManager.getGameManager();
-
         MainListener.setHunterCanMoove(false);
         Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable() {
             @Override
             public void run() {
-                if(gameManager.equals(GameManagerEnum.GAME)) {
+                if(GameManager.getGameManager().equals(GameManagerEnum.GAME)) {
                     MainListener.setHunterCanMoove(true);
                     Bukkit.getOnlinePlayers().stream().filter(player -> !GameManager.getSpeedrunners().contains(player)).forEach(player -> {
                         player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 20 * 7, 1));

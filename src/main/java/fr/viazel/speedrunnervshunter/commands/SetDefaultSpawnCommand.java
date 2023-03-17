@@ -20,7 +20,6 @@ public class SetDefaultSpawnCommand implements CommandExecutor {
         ConfigFile configFile = new ConfigFile();
         configFile.setDefaultSpawn(p.getPlayer().getLocation());
         SpeedRunnerLogger.sendMessage(p.getPlayer(), "§aLe spawn des SpeedRunners a bien été défini !");
-        SpeedRunnerLogger.sendMessage(p.getPlayer(), GameManager.getGameManager().toString());
 
         return false;
     }

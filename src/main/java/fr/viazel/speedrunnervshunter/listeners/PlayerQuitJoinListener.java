@@ -11,16 +11,10 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 public class PlayerQuitJoinListener implements Listener {
 
-    private final GameManagerEnum gameManager;
-
-    public PlayerQuitJoinListener() {
-        gameManager = GameManager.getGameManager();
-    }
-
     @EventHandler
     public void event(PlayerQuitEvent e) {
 
-        if(gameManager != GameManagerEnum.START) {
+        if(GameManager.getGameManager() != GameManagerEnum.START) {
             e.setQuitMessage(null);
         }
 
@@ -35,7 +29,7 @@ public class PlayerQuitJoinListener implements Listener {
 
         if(!MainListener.getP().isOp()) MainListener.getP().setGameMode(GameMode.ADVENTURE);
 
-        if(gameManager != GameManagerEnum.START) {
+        if(GameManager.getGameManager() != GameManagerEnum.START) {
             MainListener.getP().kickPlayer("§cLa partie est déjà lancée !\n\n§bNous sommes désolée...\n§fSpeedRunner VS Hunter | JeromeGame");
             return;
         }
